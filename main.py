@@ -7,24 +7,27 @@ from fastapi import FastAPI, Body, Path, Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from jwt_manager import create_token
+# from jwt_manager import create_token
 from fastapi.security import HTTPBearer
 
 from starlette.responses import JSONResponse
 
 app = FastAPI()
-app.title = "Documentación de peliculas."  # cambiar el titulo de la documentación
+app.title = "Documentación de cleaners."  # cambiar el titulo de la documentación
 app.version = "1.0.0"  # cambiar la version de la documentation
 
+
+# uvicorn main:app --reload
 
 # Atributos de la clase movie
 class Cleaner(BaseModel):
     id: Optional[int] = None
     name: str = Field(default="John Doe", min_length=5, max_length=15)
     age: int = Field(default=30, ge=18, le=70)
+    gender: str = Field(default="Female",)
     hourly_rate: float = Field(default=20.0, ge=10.0)
     city: str = Field(default="New York", min_length=5, max_length=15)
-
+    zone: str = Field(default="Center", min_length=2, max_length=15)
 
 
 cleaners = [
@@ -32,28 +35,33 @@ cleaners = [
         'id': 1,
         'name': 'Jane Doe',
         'age': 35,
+        'gender': 'male',
         'hourly_rate': 25.0,
         'city': "Los Angeles",
+        'zone': 'North'
     },
     {
         'id': 2,
         'name': 'John Smith',
         'age': 40,
+        'gender': 'male',
         'hourly_rate': 30.0,
         'city': "New York",
+        'zone': 'North'
     },
     {
         'id': 3,
         'name': 'Jane Smith',
         'age': 25,
+        'gender': 'male',
         'hourly_rate': 20.0,
         'city': "San Francisco",
+        'zone': 'South'
     }
 ]
 
 
-
-@app.get("/", tags=["home"])  # Agrupar rutas  esta es home
+@app.get("/", tags=["Home"])  # Agrupar rutas  esta es home
 async def root():
     return HTMLResponse(" <h1>Hello world</h1>")
 
@@ -79,8 +87,14 @@ def get_cleaner_by_city(city: str = Query(min_length=5, max_length=15)) -> List[
     return JSONResponse(content=data)
 
 
+@app.get("/cleaners/zone/{zone}", tags=["Cleaners"], response_model=List[Cleaner])
+def get_cleaner_by_zone(zone: str = Query(min_length=5, max_length=15)) -> List[Cleaner]:
+    data = list(filter(lambda x: x["zone"] == zone, cleaners))
+    return JSONResponse(content=data)
+
+
 @app.post("/cleaner/", tags=["Cleaners"], response_model=dict)
-def create_movie(movie: Cleaner) -> dict:
+def create_cleaner(movie: Cleaner) -> dict:
     cleaners.append(movie)
     return JSONResponse(content={'message': 'se ha registrado el personal'})
 
@@ -95,7 +109,7 @@ def edit_cleaner(id: int, cleaner: Cleaner) -> dict:
             return JSONResponse(content={'message': 'se han actualizado los datos'})
 
 
-@app.delete("/cleaner/{id}", tags=["Cleaner"], response_model=dict)
+@app.delete("/cleaner/{id}", tags=["Cleaners"], response_model=dict)
 def delete_cleaner(id: int) -> dict:
     for item in cleaners:
         if item['id'] == id:

@@ -16,6 +16,9 @@ Copy code
 pip install fastapi jwt_manager
 Uso
 
+uvicorn main:app --reload
+
+
 La aplicación ofrece una serie de endpoint que permiten al usuario realizar diferentes operaciones con los datos sobre el personal de limpieza. Estos endpoint incluyen:
 
 /cleaners - Devuelve la información de todo el personal de limpieza.
